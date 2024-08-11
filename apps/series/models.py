@@ -4,9 +4,15 @@ class Genre(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=25)
 
+    def __str__(self) -> str:
+        return self.name
+
 class SerieStatus(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=25)
+
+    def __str__(self) -> str:
+        return self.name
 
 class Series(models.Model):
     id = models.AutoField(primary_key=True)
@@ -14,9 +20,12 @@ class Series(models.Model):
     description = models.TextField(null=None)
     release_date = models.DateField(null=None)
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE) #El principal?
-    image_url = models.TextField(blank=True) #opcional?
+    image_url = models.URLField(blank=True, null=None)
     rating = models.IntegerField()
     status = models.ForeignKey(SerieStatus, on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return self.title
 
 class Episodes(models.Model):
     id = models.AutoField(primary_key=True)
