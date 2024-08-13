@@ -19,7 +19,7 @@ class SeriesView(generics.ListCreateAPIView):
 
     def post(self, request, *args, **kwargs): #Se permiten parametros adicionales sin generar error
         try:
-            serializer = SeriesSerializer(data=request.data)
+            serializer = SeriesSerializer(data=request.data, context={'request': request})
             if serializer.is_valid():
                 image = request.FILES.get('image')
                 print(image)
@@ -32,13 +32,13 @@ class SeriesView(generics.ListCreateAPIView):
                     serializer.save(image_url=image_url)
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
                 else:
-                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({"detail":"Falta el campo image"}, status=status.HTTP_400_BAD_REQUEST)
                 
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             print(e)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail":str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
 class EpisodesView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
