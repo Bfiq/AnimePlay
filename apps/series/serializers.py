@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Genre, Series, Episodes
-from apps.utils.validation_image import ValidationImage
+from apps.utils.validation_image import ValidationFiles
 
 class GenderSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,10 +19,17 @@ class SeriesSerializer(serializers.ModelSerializer):
         print('AQUI?')
         if image:
             print('ENTRE?')
-            ValidationImage.validate(image)
+            ValidationFiles.validate_image(image)
         return data
 
 class EpisodesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Episodes
         fields = '__all__'
+
+    def validate(self, data):
+        video = self.context['request'].FILES.get('video')
+
+        if video:
+            ValidationFiles.validate_video(video)
+        return data

@@ -33,5 +33,5 @@ class Episodes(models.Model):
     title = models.CharField(max_length=255, null=None)
     episode_number = models.IntegerField(null=None)
     release_date = models.DateField()
-    video_url = models.TextField(null=None)
+    video_url = models.URLField(null=None)
     thumbnail_url = models.TextField(null=None) #miniatura

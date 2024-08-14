@@ -25,7 +25,7 @@ class SeriesView(generics.ListCreateAPIView):
                 print(image)
                 if image:
                     azure_blob_service = AzureBlobService()
-                    image_url = azure_blob_service.upload_image(image)
+                    image_url = azure_blob_service.upload_file(image)
 
                     print("ANTES DE...")
 
@@ -45,3 +45,23 @@ class EpisodesView(generics.ListCreateAPIView):
 
     queryset = Episodes.objects.all()
     serializer_class = EpisodesSerializer
+
+    def post(self, request, *args, **kwargs): 
+        try:
+            serializer = EpisodesSerializer(data=request.data, context={'request': request})
+            if serializer.is_valid():
+                video = request.FILES.get('video')
+                print(video)
+                if video:
+                    azure_blob_service = AzureBlobService()
+                    video_url = azure_blob_service.upload_file(video)
+
+                    serializer.save(image_url=video_url)
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                else:
+                    return Response({"detail":"Falta el campo video"}, status=status.HTTP_400_BAD_REQUEST)
+                
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"detail":str(e)}, status=status.HTTP_400_BAD_REQUEST)
