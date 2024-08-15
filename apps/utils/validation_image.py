@@ -16,3 +16,4 @@ class ValidationFiles:
             raise ValidationError('No se ha proporcionado ningún archivo')
         if file.content_type != 'video/mp4':
             raise ValidationError('El archivo debe ser de formato MP4')
+        

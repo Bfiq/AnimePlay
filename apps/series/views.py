@@ -1,3 +1,4 @@
+import datetime
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from .models import Genre, Series, Episodes
@@ -5,6 +6,7 @@ from .serializers import GenderSerializer, SeriesSerializer, EpisodesSerializer
 from apps.utils.azure_storage import AzureBlobService
 from rest_framework.response import Response
 from rest_framework import status
+from apps.utils.mongodb import get_database
 
 class GenreView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
@@ -56,7 +58,12 @@ class EpisodesView(generics.ListCreateAPIView):
                     azure_blob_service = AzureBlobService()
                     video_url = azure_blob_service.upload_file(video)
 
-                    serializer.save(image_url=video_url)
+                    serializer.save(video_url=video_url)
+
+                    #Crear sección de comentarios
+                    comments_collection = get_database()['comments']
+                    comments_collection.insert_one({"episode_id": serializer.data['id'], "comments": []})
+
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
                 else:
                     return Response({"detail":"Falta el campo video"}, status=status.HTTP_400_BAD_REQUEST)
@@ -65,3 +72,27 @@ class EpisodesView(generics.ListCreateAPIView):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"detail":str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+class CommentsView(generics.CreateAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        try:
+            episode_id = request.data.get('episode_id')
+            comment_text = request.data.get('comment_text')
+
+            if not episode_id or not comment_text:
+                return Response({"detail": "Faltan campos necesarios"}, status=status.HTTP_400_BAD_REQUEST)
+
+            comments_collection = get_database()['comments']
+            result = comments_collection.update_one(
+                {"episode_id": episode_id},
+                {"$push": {"comments": {"user_id": request.user.id, "comment_text": comment_text, "timestamp": datetime.date.today() }}}
+            )
+            
+            if result.modified_count > 0:
+                return Response({"detail": "Comentario añadido exitosamente"}, status=status.HTTP_201_CREATED)
+            else:
+                return Response({"detail": "No se encontró el episodio"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"detail":str(e)}, status=status.HTTP_404_NOT_FOUND)

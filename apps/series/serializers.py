@@ -26,6 +26,7 @@ class EpisodesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Episodes
         fields = '__all__'
+        extra_kwargs = {'video_url':{'read_only': True}}
 
     def validate(self, data):
         video = self.context['request'].FILES.get('video')
