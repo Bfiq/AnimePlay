@@ -1,8 +1,8 @@
 from datetime import datetime
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
-from .models import Genre, Series, Episodes
-from .serializers import GenderSerializer, SeriesSerializer, EpisodesSerializer
+from .models import Genre, Series, Episodes, Favorites
+from .serializers import GenderSerializer, SeriesSerializer, EpisodesSerializer, FavoritesSerializer
 from apps.utils.azure_storage import AzureBlobService
 from rest_framework.response import Response
 from rest_framework import status
@@ -127,3 +127,8 @@ class CommentsView(generics.CreateAPIView):
                 return Response({"detail": "No se encontró el episodio"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"detail":str(e)}, status=status.HTTP_404_NOT_FOUND)
+        
+class FavoritesView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Favorites.objects.all()
+    serializer_class = FavoritesSerializer

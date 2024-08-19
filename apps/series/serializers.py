@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Genre, Series, Episodes
+from .models import Genre, Series, Episodes, Favorites
 from apps.utils.validation_image import ValidationFiles
 
 class GenderSerializer(serializers.ModelSerializer):
@@ -34,3 +34,8 @@ class EpisodesSerializer(serializers.ModelSerializer):
         if video:
             ValidationFiles.validate_video(video)
         return data
+    
+class FavoritesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Favorites
+        fields = '__all__'

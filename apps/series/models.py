@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.auth.models import User
+from django.db.models import UniqueConstraint
 
 class Genre(models.Model):
     id = models.AutoField(primary_key=True)
@@ -34,3 +36,13 @@ class Episodes(models.Model):
     episode_number = models.IntegerField(null=None)
     release_date = models.DateField()
     video_url = models.URLField(blank=True, null=None)
+
+class Favorites (models.Model):
+    userFk = models.ForeignKey(User, on_delete=models.CASCADE)
+    serieFk = models.ForeignKey(Series, on_delete=models.CASCADE)
+    rating = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=['userFk', 'serieFk'], name='unique_user_serie')
+        ]
